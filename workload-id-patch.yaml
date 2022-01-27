@@ -1,0 +1,6 @@
+spec:
+  template:
+    spec:
+      serviceAccountName: "argo-terraform"
+      nodeSelector:
+        iam.gke.io/gke-metadata-server-enabled: "true"

@@ -12,27 +12,15 @@ spec:
           - name: terraform
             path: /home/terraform
             git:
-              repo: https://github.com/descrepes/terraform-argo-demo.git
+              repo: https://github.com/tony-mw/argo-demo.git
               depth: 1
       script:
         imagePullPolicy: "Always"
         image: hashicorp/terraform:latest
         command: ["sh"]
         source: |
-          export ARM_ACCESS_KEY=ACCESS_KEY
-          export ARM_CLIENT_ID=CLIENT_ID
-          export ARM_CLIENT_SECRET=CLIENT_SECRET
-          export ARM_SUBSCRIPTION_ID=SUBSCRIPTION_ID
-          export ARM_TENANT_ID=TENANT_ID
-          export CLOUDFLARE_API_TOKEN=MYTOKEN
-          export TF_VAR_cloudflare_zone_id=MYZONEID
-          export TF_VAR_pingdom_user=MYUSERNAME
-          export TF_VAR_pingdom_password=MYPASSWORD
-          export TF_VAR_pingdom_api_key=MYAPIKEY
-
-          cp /home/terraform/*.tf /home/myuser/
-          /bin/terraform init -input=false /home/myuser
-          /bin/terraform plan -parallelism=2 -input=false -no-color -out=/home/myuser/tfclientsplan /home/myuser >> /tmp/terraform-change.log
+          terraform init -input=false /home/terraform
+          terraform plan -parallelism=2 -input=false -no-color -out=/home/terraform/tfclientsplan /home/terraform >> /tmp/terraform-change.log
       outputs:
         artifacts:
           - name: terraform-plan
@@ -55,17 +43,7 @@ spec:
         image: hashicorp/terraform:latest
         command: ["sh"]
         source: |
-          export ARM_ACCESS_KEY=ACCESS_KEY
-          export ARM_CLIENT_ID=CLIENT_ID
-          export ARM_CLIENT_SECRET=CLIENT_SECRET
-          export ARM_SUBSCRIPTION_ID=SUBSCRIPTION_ID
-          export ARM_TENANT_ID=TENANT_ID
-          export CLOUDFLARE_API_TOKEN=MYTOKEN
-          export TF_VAR_cloudflare_zone_id=MYZONEID
-          export TF_VAR_pingdom_user=MYUSERNAME
-          export TF_VAR_pingdom_password=MYPASSWORD
-          export TF_VAR_pingdom_api_key=MYAPIKEY
-          /bin/terraform apply -input=false -parallelism=2 -no-color /home/terraform/tfclientsplan
+          terraform apply -input=false -parallelism=2 -no-color /home/terraform/tfclientsplan
 
     - name: approve
       suspend: {}
