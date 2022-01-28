@@ -1,0 +1,19 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: github-events
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: test-34.134.136.26.sslip.io
+      http:
+        paths:
+          - path: /push
+            pathType: Prefix
+            backend:
+              service:
+                name: github-eventsource-svc
+                port:
+                  number: 12000
