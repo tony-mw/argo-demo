@@ -65,7 +65,11 @@ spec:
         image: "{{workflow.parameters.terraform-docker-image}}"
         command: ["sh"]
         source: |
+          pwd
+          whoami
+          ls -la
           terraform -chdir=/home/argo/terraform/dev init -input=false
+          chmod 755 -R /home/argo/terraform/dev/.terraform
           terraform -chdir=/home/argo/terraform/dev apply -input=false -parallelism=2 -no-color /home/argo/tfclientsplan
 
     - name: approve
