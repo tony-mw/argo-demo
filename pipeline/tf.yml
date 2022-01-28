@@ -1,34 +1,57 @@
----
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
-  name: terraform
-  namespace: argo
+  annotations:
+    workflows.argoproj.io/description: Deploy the terraform
+    workflows.argoproj.io/maintainer: 'good_people'
+    workflows.argoproj.io/tags: terraform
+    workflows.argoproj.io/version: '>= 2.9.0'
+  name: terraform-basic
 spec:
+  serviceAccountName: argo-terraform
+  entrypoint: update
+  arguments:
+    parameters:
+      - name: terraform-docker-image
+        value: "apresti12/argo-terraform:latest"
+      - name: terraform-script-repository
+        value: "https://github.com/tony-mw/argo-demo.git"
   templates:
     - name: plan
       inputs:
         artifacts:
           - name: terraform
-            path: /home/terraform
+            path: /home/argo
             git:
-              repo: https://github.com/tony-mw/argo-demo.git
+              repo: "{{workflow.parameters.terraform-script-repository}}"
               depth: 1
       script:
         imagePullPolicy: "Always"
-        image: hashicorp/terraform:latest
+        image: "{{workflow.parameters.terraform-docker-image}}"
         command: ["sh"]
         source: |
-          terraform init -input=false /home/terraform
-          terraform plan -parallelism=2 -input=false -no-color -out=/home/terraform/tfclientsplan /home/terraform >> /tmp/terraform-change.log
+          pwd
+          whoami
+          ls -la
+          terraform -chdir=/home/argo/terraform/dev init -input=false
+          echo "Init Complete"
+          terraform -chdir=/home/argo/terraform/dev plan -parallelism=2 -input=false -no-color -out=/home/argo/tfclientsplan >> /tmp/terraform-change.log
+          echo "Plan Complete"
+          ls -la terraform/dev
       outputs:
         artifacts:
           - name: terraform-plan
-            path: /home/myuser/
+            path: /home/argo/
+            gcs:
+              bucket: mw-argo-workflows-artifacts
+              key: terraform/plan
             archive:
               none: {}
           - name: terraform-log
             path: /tmp/terraform-change.log
+            gcs:
+              bucket: mw-argo-workflows-artifacts
+              key: terraform/log
             archive:
               none: {}
 
@@ -36,14 +59,14 @@ spec:
       inputs:
         artifacts:
           - name: terraform-plan
-            path: /home/terraform
-      serviceAccountName: argo
+            path: /home/argo
       script:
         imagePullPolicy: "Always"
-        image: hashicorp/terraform:latest
+        image: "{{workflow.parameters.terraform-docker-image}}"
         command: ["sh"]
         source: |
-          terraform apply -input=false -parallelism=2 -no-color /home/terraform/tfclientsplan
+          terraform -chdir=/home/argo/terraform/dev init -input=false
+          terraform -chdir=/home/argo/terraform/dev apply -input=false -parallelism=2 -no-color /home/argo/tfclientsplan
 
     - name: approve
       suspend: {}
@@ -53,10 +76,6 @@ spec:
         tasks:
           - name: plan
             template: plan
-            outputs:
-              artifacts:
-                - name: terraform-plan
-                  path: /home/myuser/
           - name: approve
             dependencies: [plan]
             template: approve
@@ -67,3 +86,4 @@ spec:
               artifacts:
                 - name: terraform-plan
                   from: "{{tasks.plan.outputs.artifacts.terraform-plan}}"
+
