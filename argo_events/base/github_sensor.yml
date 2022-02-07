@@ -7,19 +7,19 @@ spec:
   template:
     serviceAccountName: argo-terraform
   dependencies:
-    - name: push-main
-      eventSourceName: github
-      eventName: example
-      filters:
-        data:
-          - path: body.X-GitHub-Event
-            type: string
-            value:
-              - push
-          - path: body.ref
-            type: string
-            value:
-              - refs/heads/main
+#    - name: push-main
+#      eventSourceName: github
+#      eventName: example
+#      filters:
+#        data:
+#          - path: body.X-GitHub-Event
+#            type: string
+#            value:
+#              - push
+#          - path: body.ref
+#            type: string
+#            value:
+#              - refs/heads/main
     - name: pr-main
       eventSourceName: github
       eventName: example
@@ -36,14 +36,6 @@ spec:
               - edited
               - synchronize
               - reopened
-          - path: body.pull_request.state
-            type: string
-            value:
-              - open
-          - path: body.pull_request.base.ref
-            type: string
-            value:
-              - main
   triggers:
     - template:
         conditions: push-main
@@ -59,18 +51,12 @@ spec:
               kind: Workflow
               metadata:
                 generateName: k8s-tools-push-main-
-                source:
-                  resource:
-                    apiVersion: argoproj.io/v1alpha1
-                    kind: Workflow
-                    metadata:
-                      name: terraform-trigger
-                    spec:
-                      serviceAccountName: argo-terraform
-                      entrypoint: update
-                      workflowTemplateRef:
-                        name: terraform-basic
-                        clusterScope: true
+              spec:
+                serviceAccountName: argo-terraform
+                entrypoint: update
+                workflowTemplateRef:
+                  name: terraform-basic
+                  #clusterScope: true
     - template:
         conditions: pr-main
         name: terraform-pr-main
@@ -84,19 +70,13 @@ spec:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                generateName: k8s-tools-pr-main-
-                source:
-                  resource:
-                    apiVersion: argoproj.io/v1alpha1
-                    kind: Workflow
-                    metadata:
-                      name: terraform-trigger
-                    spec:
-                      serviceAccountName: argo-terraform
-                      entrypoint: update
-                      workflowTemplateRef:
-                        name: terraform-basic
-                        clusterScope: true
+                generateName: k8s-tools-push-main-
+              spec:
+                serviceAccountName: argo-terraform
+                entrypoint: update
+                workflowTemplateRef:
+                  name: terraform-basic
+                  #clusterScope: true
 
 #    - template:
 #        conditions: tag
