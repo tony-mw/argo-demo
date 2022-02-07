@@ -20,6 +20,19 @@ spec:
             type: string
             value:
               - refs/heads/main
+    - name: pr-main
+      eventSourceName: github
+      eventName: example
+      filters:
+        data:
+          - path: body.X-GitHub-Event
+            type: string
+            value:
+              - pullRequestEvent
+          - path: body.action
+            type: string
+            value:
+              - opened
   triggers:
     - template:
         conditions: push-main
@@ -35,6 +48,32 @@ spec:
               kind: Workflow
               metadata:
                 generateName: k8s-tools-push-main-
+                source:
+                  resource:
+                    apiVersion: argoproj.io/v1alpha1
+                    kind: Workflow
+                    metadata:
+                      name: terraform-trigger
+                    spec:
+                      serviceAccountName: argo-terraform
+                      entrypoint: update
+                      workflowTemplateRef:
+                        name: terraform-basic
+                        clusterScope: true
+    - template:
+        conditions: pr-main
+        name: terraform-pr-main
+        argoWorkflow:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: k8s-tools-pr-main-
                 source:
                   resource:
                     apiVersion: argoproj.io/v1alpha1
