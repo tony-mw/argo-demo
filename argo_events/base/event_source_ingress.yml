@@ -7,7 +7,7 @@ metadata:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
-    - host: test-34.134.136.26.sslip.io
+    - host: test-34.135.60.18.sslip.io
       http:
         paths:
           - path: /push

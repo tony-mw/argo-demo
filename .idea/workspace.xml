@@ -5,13 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9c6144d8-d0fb-4fd4-89a8-939dd35b9182" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/argo_events/event_source.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/argo_events/event_source_ingress.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/argo_events/eventbus.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/argo_events/github_event_secret.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/argo_events/install_events.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/argo_events/loadbalancer.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/argo_events/sensor.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argo_events/sensor.yml" beforeDir="false" afterPath="$PROJECT_DIR$/argo_events/sensor.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
