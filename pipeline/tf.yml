@@ -35,7 +35,7 @@ spec:
           ls -la
           terraform -chdir=/home/argo/terraform/dev init -input=false
           echo "Init Complete"
-          terraform -chdir=/home/argo/terraform/dev plan -parallelism=2 -input=false -no-color -out=/home/argo/tfclientsplan >> /tmp/terraform-change.log
+          terraform -chdir=/home/argo/terraform/dev plan -parallelism=2 -input=false -no-color -out=/home/argo/tfclientsplan >> /home/argo/terraform-change.log
           echo "Plan Complete"
           ls -la terraform/dev
       outputs:
@@ -48,7 +48,7 @@ spec:
             archive:
               none: {}
           - name: terraform-log
-            path: /tmp/terraform-change.log
+            path: /home/argo/terraform-change.log
             gcs:
               bucket: mw-argo-workflows-artifacts
               key: terraform/log

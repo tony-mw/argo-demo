@@ -1,0 +1,143 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: terraform-github
+spec:
+  template:
+    serviceAccountName: argo-terraform
+  dependencies:
+#    - name: push-main
+#      eventSourceName: github
+#      eventName: example
+#      filters:
+#        data:
+#          - path: body.X-GitHub-Event
+#            type: string
+#            value:
+#              - push
+#          - path: body.ref
+#            type: string
+#            value:
+#              - refs/heads/main
+    - name: pr-main
+      eventSourceName: github
+      eventName: example
+      filters:
+        data:
+          - path: body.X-GitHub-Event
+            type: string
+            value:
+              - pull_request
+          - path: body.action
+            type: string
+            value:
+              - opened
+              - edited
+              - synchronize
+              - reopened
+  triggers:
+    - template:
+        conditions: push-main
+        name: terraform-push-main
+        argoWorkflow:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: k8s-tools-push-main-
+              spec:
+                serviceAccountName: argo-terraform
+                entrypoint: update
+                workflowTemplateRef:
+                  name: terraform-basic
+                  #clusterScope: true
+    - template:
+        conditions: pr-main
+        name: terraform-pr-main
+        argoWorkflow:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: k8s-tools-push-main-
+              spec:
+                serviceAccountName: argo-terraform
+                entrypoint: update
+                workflowTemplateRef:
+                  name: terraform-basic
+                  #clusterScope: true
+
+#    - template:
+#        conditions: tag
+#        name: k8s-tools-tag
+#        argoWorkflow:
+#          group: argoproj.io
+#          version: v1alpha1
+#          resource: workflows
+#          operation: submit
+#          source:
+#            resource:
+#              apiVersion: argoproj.io/v1alpha1
+#              kind: Workflow
+#              metadata:
+#                generateName: k8s-tools-tag-
+#              spec:
+#                entrypoint: main
+#                podGC:
+#                  strategy: OnWorkflowSuccess
+#                serviceAccountName: devops-workflow-runner
+#                templates:
+#                  - name: main
+#                    inputs:
+#                      parameters:
+#                        - name: name
+#                          value: k8s-tools
+#                        - name: repository
+#                        - name: revision
+#                        - name: git-secret
+#                          value: gitlab-access
+#                        - name: image
+#                          value: us.gcr.io/bradw-nextgen-devops/k8s-tools
+#                        - name: tag
+#                    steps:
+#                      - - name: build
+#                          templateRef:
+#                            name: kaniko
+#                            template: gcr-workload-push
+#                            clusterScope: true
+#                          arguments:
+#                            parameters:
+#                              - name: repository
+#                                value: "{{inputs.parameters.repository}}"
+#                              - name: revision
+#                                value: "{{inputs.parameters.revision}}"
+#                              - name: git-secret
+#                                value: "{{inputs.parameters.git-secret}}"
+#                              - name: image
+#                                value: "{{inputs.parameters.image}}"
+#                              - name: tag
+#                                value: "{{inputs.parameters.tag}}"
+#          parameters:
+#            - src:
+#                dependencyName: tag
+#                dataKey: body.repository.git_http_url
+#              dest: spec.templates.0.inputs.parameters.1.value
+#            - src:
+#                dependencyName: tag
+#                dataKey: body.ref
+#              dest: spec.templates.0.inputs.parameters.2.value
+#            - src:
+#                dependencyName: tag
+#                dataTemplate: "{{ .Input.body.ref | splitList \"/\" | last }}"
+#              dest: spec.templates.0.inputs.parameters.5.value
