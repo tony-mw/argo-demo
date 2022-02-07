@@ -15,7 +15,7 @@ spec:
           - path: body.X-GitHub-Event
             type: string
             value:
-              - pushEvent
+              - push
           - path: body.ref
             type: string
             value:
@@ -28,11 +28,22 @@ spec:
           - path: body.X-GitHub-Event
             type: string
             value:
-              - pullRequestEvent
+              - pull_request
           - path: body.action
             type: string
             value:
               - opened
+              - edited
+              - synchronize
+              - reopened
+          - path: body.pull_request.state
+            type: string
+            value:
+              - open
+          - path: body.pull_request.base.ref
+            type: string
+            value:
+              - main
   triggers:
     - template:
         conditions: push-main
